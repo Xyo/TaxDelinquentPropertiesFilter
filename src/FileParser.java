@@ -3,31 +3,17 @@ import org.apache.pdfbox.io.RandomAccessFile;
 import org.apache.pdfbox.pdfparser.PDFParser;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.text.PDFTextStripper;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FilenameFilter;
+
+import java.io.*;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Created by Jeremy on 4/9/2017.
  */
 public class FileParser {
-    public static void main(String args[]) {
-        File f = new File("C:\\Users\\Jeremy\\Desktop\\Files");
-        File[] matchingFiles = f.listFiles(new FilenameFilter() {
-            public boolean accept(File dir, String name) {
-                return name.endsWith(".pdf");
-            }
-        });
-        if(matchingFiles != null){
-            System.out.println("printing file: ");
-            for(File file : matchingFiles){
-                String result = parsePDF(file);
-                System.out.println("PDF FILE HERE: " + result);
-            }
 
-        }
 
-    }
 
     public static String parsePDF(File pdfFile){
         PDDocument pdDoc = null;
@@ -63,5 +49,53 @@ public class FileParser {
         return parsedText;
     }
 
+    public static List<Key> parseKeyFile(File keyFile){
+
+        String line;
+        List<Key> keys = new ArrayList<>();
+        try{
+            BufferedReader br = new BufferedReader(new FileReader(keyFile));
+            while((line=br.readLine()) != null
+                    && !line.isEmpty()){
+                String[] parts = line.split(" ");
+                keys.add( new Key(parts[0], parts[1], parts[2]));
+            }
+        }catch(IOException e){
+            e.printStackTrace();
+        }
+        return keys;
+    }
+
+    public static File[] getPDFFiles(){
+        File f = new File(getFilePath());
+        File[] matchingFiles = f.listFiles(new FilenameFilter() {
+            public boolean accept(File dir, String name) {
+                return name.endsWith(".pdf");
+            }
+        });
+        return matchingFiles;
+    }
+
+    public static File getKeyFile(){
+        File f = new File(getFilePath());
+        File[] matchingFiles = f.listFiles(new FilenameFilter() {
+            public boolean accept(File dir, String name) {
+                return (name.startsWith("key")) && name.endsWith(".txt");
+            }
+        });
+        return matchingFiles[0];
+    }
+
+
+    public static String getFilePath(){
+        String executionPath = "";
+        try{
+            executionPath = System.getProperty("user.dir");
+            System.out.print(executionPath.replace("\\", "/"));
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+        return executionPath;
+    }
 
 }
